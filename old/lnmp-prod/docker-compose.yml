@@ -1,0 +1,44 @@
+version: '2'
+services:
+    nginx:
+        image: "bitnami/nginx:latest"
+        ports:
+            - "80:80"
+            - '443:443'
+        volumes:
+         - ./nginx/vhost.conf:/bitnami/nginx/conf/vhosts/yourapp.conf
+         - ./nginx/app:/app
+        networks:
+            - frontend
+        depends_on:
+            - php
+    php:
+        image: "bitnami/php-fpm:latest"
+        ports:
+            - '9000:9000'
+        volumes:
+            - ./php/php-fpm.conf:/opt/bitnami/php/etc/php-fpm.conf
+            - ./php/custom.ini:/opt/bitnami/php/etc/conf.d/custom.ini
+        networks:
+            - frontend
+            - backend
+        environment:
+            MYSQL_PASSWORD: Passw0rd
+        depends_on:
+            - mysql
+    mysql:
+        image: mysql:5.7
+        volumes:
+            - mysql-data:/var/lib/mysql
+        environment:
+            TZ: 'Asia/Shanghai'
+            MYSQL_ROOT_PASSWORD: Passw0rd
+        command: ['mysqld', '--character-set-server=utf8']
+        networks:
+            - backend
+volumes:
+    mysql-data:
+
+networks:
+    frontend:
+    backend:
